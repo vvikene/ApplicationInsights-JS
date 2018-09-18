@@ -7,7 +7,8 @@ import {
     IConfig,
     Util, PageViewPerformance, Event,
     PageView, IEnvelope, RemoteDependencyData,
-    Data, Metric, Exception, SeverityLevel
+    Data, Metric, Exception, SeverityLevel,
+    Trace
 } from "applicationinsights-common";
 import {
     IPlugin, IConfiguration, IAppInsightsCore,
@@ -22,6 +23,7 @@ import { IPageViewTelemetry, IPageViewTelemetryInternal } from "../JavaScriptSDK
 import { ITelemetryConfig } from "../JavaScriptSDK.Interfaces/ITelemetryConfig";
 import { TelemetryItemCreator } from "./TelemetryItemCreator";
 import { IExceptionTelemetry, IAutoExceptionTelemetry } from "../JavaScriptSDK.Interfaces/IExceptionTelemetry";
+import { ITraceTelemetry } from "../JavaScriptSDK.Interfaces/ITraceTelemetry";
 
 "use strict";
 
@@ -84,6 +86,26 @@ export class ApplicationInsights implements IAppInsights, ITelemetryPlugin, IApp
 
     public setNextPlugin(next: ITelemetryPlugin) {
         this._nextPlugin = next;
+    }
+
+    public trackTrace(trace: ITraceTelemetry, customProperties?: {[key: string]: any}): void {
+        try {
+            var telemetryItem: ITelemetryItem = TelemetryItemCreator.createItem
+            (
+                this._logger,
+                trace,
+                Trace.dataType,
+                Trace.envelopeType,
+                customProperties
+            );
+            this._setTelemetryNameAndIKey(telemetryItem);
+            this.core.track(telemetryItem);
+        } catch (e) {
+            this._logger.throwInternal(LoggingSeverity.WARNING,
+                _InternalMessageId.TrackTraceFailed,
+                "trackTrace failed, trace will not be collected: " + Util.getExceptionName(e),
+                { exception: Util.dump(e) });
+        }
     }
 
     /**

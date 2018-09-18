@@ -1,7 +1,7 @@
 /// <reference path="./TestFramework/Common.ts" />
 /// <reference path="../JavaScriptSDK/ApplicationInsights.ts" />
 
-import { Util, Exception, SeverityLevel, Envelope } from "applicationinsights-common";
+import { Util, Exception, SeverityLevel, Envelope, Trace } from "applicationinsights-common";
 import {
     ITelemetryItem, AppInsightsCore, IAppInsightsCore,
     IPlugin, IConfiguration
@@ -44,6 +44,7 @@ export class ApplicationInsightsTests extends TestClass {
                     "config",
                     "trackException",
                     "_onerror",
+                    "trackTrace",
                     "trackPageView",
                     "startTrackEvent",
                     "stopTrackEvent",
@@ -91,6 +92,7 @@ export class ApplicationInsightsTests extends TestClass {
 
                 // Test
                 test(() => appInsights.trackException({error: new Error(), severityLevel: SeverityLevel.Critical}), Exception.envelopeType, Exception.dataType)
+                test(() => appInsights.trackTrace({message: "some string"}), Trace.envelopeType, Trace.dataType);
             }
         });
 
@@ -508,7 +510,6 @@ export class ApplicationInsightsTests extends TestClass {
                 Assert.equal(testValues.properties.property2, actualProperties.property2);
             }
         });
-/* TODO: Commented until ai.context is valid
         this.testCase({
             name: "Timing Tests: Start/StopPageView tracks single page view with no parameters",
             test: () => {
@@ -517,7 +518,7 @@ export class ApplicationInsightsTests extends TestClass {
                 this.sandbox.stub(core, "getTransmissionControl");
                 var appInsights = new ApplicationInsights();
                 appInsights.initialize({ "instrumentationKey": "ikey" }, core, []);
-                var trackStub = this.sandbox.stub(appInsights.context, "track");
+                var trackStub = this.sandbox.stub(appInsights.core, "track");
                 this.clock.tick(10);        // Needed to ensure the duration calculation works
 
                 // act
@@ -541,7 +542,7 @@ export class ApplicationInsightsTests extends TestClass {
                 this.sandbox.stub(core, "getTransmissionControl");
                 var appInsights = new ApplicationInsights();
                 appInsights.initialize({ "instrumentationKey": "ikey" }, core, []);
-                var trackStub = this.sandbox.stub(appInsights.context, "track");
+                var trackStub = this.sandbox.stub(appInsights.core, "track");
                 this.clock.tick(10);        // Needed to ensure the duration calculation works
 
                 // act
@@ -570,7 +571,6 @@ export class ApplicationInsightsTests extends TestClass {
                 Assert.deepEqual(testValues.properties, telemetry.data);
             }
         });
-        */
 
         this.testCase({
             name: "Timing Tests: Multiple startTrackPage",
