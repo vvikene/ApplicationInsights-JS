@@ -114,7 +114,11 @@ export class Initialization {
 
                 //appInsightsInstance.context._sender.triggerSend();
 
-                appInsightsInstance.core.getTransmissionControl().flush(true);
+                appInsightsInstance.core.getTransmissionControls().forEach(element => {
+                    if (element.length > 0) {
+                        element.forEach(e => e.flush(true));
+                    }
+                });
                 // Back up the current session to local storage
                 // This lets us close expired sessions after the cookies themselves expire
                 this.properties._sessionManager.backup();
