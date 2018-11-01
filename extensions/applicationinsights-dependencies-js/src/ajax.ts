@@ -21,21 +21,24 @@ export interface IDependenciesPlugin {
 }
 
 export class AjaxMonitor implements ITelemetryPlugin, IDependenciesPlugin {
-    private initialized: boolean; // ajax monitoring initialized
-    private _fetchInitialized: boolean; // fetch monitoring initialized
     private currentWindowHost;
-    private _core: IAppInsightsCore;
-    private _config: ICorrelationConfig;
-    private _nextPlugin: ITelemetryPlugin;
-    private _trackAjaxAttempts: number = 0;
+    protected initialized: boolean; // ajax monitoring initialized
+    protected _fetchInitialized: boolean; // fetch monitoring initialized
+    protected _core: IAppInsightsCore;
+    protected _config: ICorrelationConfig;
+    protected _nextPlugin: ITelemetryPlugin;
+    protected _trackAjaxAttempts: number = 0;
+    protected addHeadersCB: (fetchData: ajaxRecord, input?: Request | string, init?: RequestInit, xhr?: XMLHttpRequestInstrumented) => any;
 
-    constructor(private addHeadersCB?: (fetchData: ajaxRecord, input?: Request | string, init?: RequestInit, xhr?: XMLHttpRequestInstrumented) => any) {
+    constructor() {
         this.currentWindowHost = window && window.location.host && window.location.host.toLowerCase();
         this.initialized = false;
         this._fetchInitialized = false;
-        if (typeof this.addHeadersCB !== 'function') {
-            this.addHeadersCB = this.includeCorrelationHeaders;
-        }
+        this.addHeadersCB = this.includeCorrelationHeaders;
+    }
+
+    public setAddHeadersCB(CB: (fetchData: ajaxRecord, input?: Request | string, init?: RequestInit, xhr?: XMLHttpRequestInstrumented) => any) {
+        this.addHeadersCB = CB;
     }
 
     ///<summary>Verifies that particalar instance of XMLHttpRequest needs to be monitored</summary>
@@ -316,7 +319,10 @@ export class AjaxMonitor implements ITelemetryPlugin, IDependenciesPlugin {
     priority: number = 161;
 
     // Fetch Stuff
-    private instrumentFetch(): void {
+    protected instrumentFetch(): void {
+        if (!this.supportsFetch() || this._fetchInitialized) {
+            return;
+        }
         const originalFetch: (input?: Request | string, init?: RequestInit) => Promise<Response> = window.fetch;
         const fetchMonitorInstance: AjaxMonitor = this;
         window.fetch = function fetch(input?: Request | string , init?: RequestInit): Promise<Response> {
@@ -346,6 +352,7 @@ export class AjaxMonitor implements ITelemetryPlugin, IDependenciesPlugin {
                     throw reason;
                 });
         }
+        this._fetchInitialized = true;
     }
 
     private isFetchInstrumented(input: Request | string): boolean {
@@ -389,7 +396,7 @@ export class AjaxMonitor implements ITelemetryPlugin, IDependenciesPlugin {
     }
 
     private includeCorrelationHeaders(ajaxData: ajaxRecord, input?: Request | string, init?: RequestInit, xhr?: XMLHttpRequestInstrumented) {
-        if (input) {
+        if (input) { // Fetch
             if (CorrelationIdHelper.canIncludeCorrelationHeader(this._config, ajaxData.getAbsoluteUrl(), this.currentWindowHost)) {
                 if (!init) {
                     init = {};
@@ -406,7 +413,7 @@ export class AjaxMonitor implements ITelemetryPlugin, IDependenciesPlugin {
 
                 return init;
             }
-        } else if (xhr) {
+        } else if (xhr) { // XHR
             if (this.currentWindowHost && CorrelationIdHelper.canIncludeCorrelationHeader(this._config, xhr.ajaxData.getAbsoluteUrl(),
                 this.currentWindowHost)) {
                 xhr.setRequestHeader(RequestHeaders.requestIdHeader, xhr.ajaxData.id);
@@ -550,9 +557,18 @@ export class AjaxMonitor implements ITelemetryPlugin, IDependenciesPlugin {
                 });
         }
     }
+
+    protected instrumentXhr() {
+        if (this.supportsMonitoring() || this.initialized) {
+            this.instrumentOpen();
+            this.instrumentSend();
+            this.instrumentAbort();
+            this.initialized = true;
+        }
+    }
     
     public initialize(config: IConfiguration, core: IAppInsightsCore, extensions: IPlugin[]) {
-        if (!this.initialized) {
+        if (!this.initialized && !this._fetchInitialized) {
             this._core = core;
             config.extensionConfig = config.extensionConfig ? config.extensionConfig : {};
             let c = config.extensionConfig[this.identifier] ? config.extensionConfig[this.identifier] : {};
@@ -570,16 +586,12 @@ export class AjaxMonitor implements ITelemetryPlugin, IDependenciesPlugin {
                 enableCorsCorrelation: Util.stringToBoolOrDefault(c.enableCorsCorrelation)
             };
 
-            if (this.supportsMonitoring() && !this._config.disableAjaxTracking) {
-                this.instrumentOpen();
-                this.instrumentSend();
-                this.instrumentAbort();
-                this.initialized = true;
+            if (this._config.disableAjaxTracking === false) {
+                this.instrumentXhr();
             }
 
-            if (this.supportsFetch() && !this._config.disableFetchTracking) {
+            if (!this._config.disableFetchTracking === false) {
                 this.instrumentFetch();
-                this._fetchInitialized = true;
             }
         }
     }
