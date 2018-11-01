@@ -185,21 +185,6 @@ export class Initialization implements IApplicationInsights {
         this.dependencies.trackDependencyData(dependency, customProperties, systemProperties);
     }
 
-    // Misc APIs
-    
-    /**
-     * Immediately send all pending telemetry still in the buffer. You are not required to use `flush` 
-     * to send telemetry as it is done for you at a configurable interval
-     * @memberof Initialization
-     */
-    public flush(async: boolean = true): void {
-        this.core.getTransmissionControls().forEach(channels => {
-            channels.forEach(channel => {
-                channel.flush(async);
-            })
-        })
-    }
-
 
     /**
      * Initialize this instance of ApplicationInsights
