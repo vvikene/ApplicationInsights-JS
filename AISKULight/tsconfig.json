@@ -13,6 +13,7 @@
     "noEmitHelpers": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
+    "declarationMap": true,
     "declarationDir": "AISKULight/types",
     "outDir": "dist-esm",
     "rootDir": "AISKULight"

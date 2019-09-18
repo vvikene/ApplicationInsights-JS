@@ -343,7 +343,7 @@ export class AjaxMonitor implements ITelemetryPlugin, IDependenciesPlugin, IInst
     private instrumentOpen() {
         const originalOpen = XMLHttpRequest.prototype.open;
         const ajaxMonitorInstance = this;
-        XMLHttpRequest.prototype.open = function (method, url, async) {
+        XMLHttpRequest.prototype.open = function (method: string, url: string, async?: boolean) {
             try {
                 if (ajaxMonitorInstance.isMonitoredInstance(this, true) &&
                     (
