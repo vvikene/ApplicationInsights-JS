@@ -12,6 +12,7 @@ import { NotificationManager } from "./NotificationManager";
 import { CoreUtils } from "./CoreUtils";
 import { IDiagnosticLogger } from "../JavaScriptSDK.Interfaces/IDiagnosticLogger";
 import { _InternalLogMessage, DiagnosticLogger } from "./DiagnosticLogger";
+import { IInternalLogMessage } from '../JavaScriptSDK.Interfaces/IInternalLogMessage';
 
 "use strict";
 
@@ -83,7 +84,7 @@ export class AppInsightsCore extends BaseCore implements IAppInsightsCore {
         }
 
         return setInterval(() => {
-            const queue: _InternalLogMessage[] = this.logger ? this.logger.queue : [];
+            const queue: IInternalLogMessage[] = this.logger ? this.logger.queue : [];
 
             queue.forEach((logMessage: _InternalLogMessage) => {
                 const item: ITelemetryItem = {

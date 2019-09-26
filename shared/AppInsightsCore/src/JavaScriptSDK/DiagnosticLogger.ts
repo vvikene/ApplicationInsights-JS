@@ -4,10 +4,10 @@
 import { IConfiguration } from "../JavaScriptSDK.Interfaces/IConfiguration"
 import { _InternalMessageId, LoggingSeverity } from "../JavaScriptSDK.Enums/LoggingEnums";
 import { IDiagnosticLogger } from "../JavaScriptSDK.Interfaces/IDiagnosticLogger";
+import { IInternalLogMessage } from '../JavaScriptSDK.Interfaces/IInternalLogMessage';
 import { CoreUtils } from "./CoreUtils";
-import { AppInsightsCore } from "./AppInsightsCore";
 
-export class _InternalLogMessage{
+export class _InternalLogMessage implements IInternalLogMessage {
     public static dataType: string = "MessageData";
 
     /**

@@ -6,7 +6,6 @@ import { ITelemetryPlugin, IPlugin } from "../JavaScriptSDK.Interfaces/ITelemetr
 import { IChannelControls } from "../JavaScriptSDK.Interfaces/IChannelControls";
 import { ITelemetryItem } from "../JavaScriptSDK.Interfaces/ITelemetryItem";
 import { CoreUtils } from "./CoreUtils";
-import { _InternalLogMessage } from "./DiagnosticLogger";
 
 "use strict";
 

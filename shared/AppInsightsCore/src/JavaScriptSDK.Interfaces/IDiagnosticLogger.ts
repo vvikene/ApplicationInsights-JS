@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { _InternalMessageId, LoggingSeverity } from "../JavaScriptSDK.Enums/LoggingEnums";
-import { _InternalLogMessage } from "../JavaScriptSDK/DiagnosticLogger";
+import { IInternalLogMessage } from "../JavaScriptSDK.Interfaces/IInternalLogMessage";
 
 "use strict"
 
@@ -33,12 +33,12 @@ export interface IDiagnosticLogger {
     /**
      * The internal logging queue
      */
-    queue: _InternalLogMessage[];
+    queue: IInternalLogMessage[];
 
     /**
      * This method will throw exceptions in debug mode or attempt to log the error as a console warning.
      * @param severity {LoggingSeverity} - The severity of the log message
-     * @param message {_InternalLogMessage} - The log message.
+     * @param message {IInternalLogMessage} - The log message.
      */
     throwInternal(severity: LoggingSeverity, msgId: _InternalMessageId, msg: string, properties?: Object, isUserAct?: boolean): void;
 
@@ -56,7 +56,7 @@ export interface IDiagnosticLogger {
     /**
      * Logs a message to the internal queue.
      * @param severity {LoggingSeverity} - The severity of the log message
-     * @param message {_InternalLogMessage} - The message to log.
+     * @param message {IInternalLogMessage} - The message to log.
      */
-    logInternalMessage?(severity: LoggingSeverity, message: _InternalLogMessage): void;
+    logInternalMessage?(severity: LoggingSeverity, message: IInternalLogMessage): void;
 }
