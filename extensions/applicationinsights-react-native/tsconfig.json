@@ -6,6 +6,7 @@
     "module": "es6",
     "moduleResolution": "Node",
     "target": "es3",
+    "jsx": "react",
     "alwaysStrict": true,
     "suppressImplicitAnyIndexErrors": true,
     "allowSyntheticDefaultImports": true,

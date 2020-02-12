@@ -8,9 +8,11 @@ import {
     ITelemetryItem,
     IPlugin,
     IConfiguration,
-    IAppInsightsCore
+    IAppInsightsCore, 
+    ICustomProperties,
+    CoreUtils
 } from '@microsoft/applicationinsights-core-js';
-import { ConfigurationManager, IDevice } from '@microsoft/applicationinsights-common';
+import { ConfigurationManager, IDevice, IMetricTelemetry, IAppInsights } from '@microsoft/applicationinsights-common';
 import DeviceInfo from 'react-native-device-info';
 
 import { INativeDevice, IReactNativePluginConfig } from './Interfaces';
@@ -23,6 +25,7 @@ export class ReactNativePlugin implements ITelemetryPlugin {
     private _initialized: boolean = false;
     private _device: INativeDevice;
     private _config: IReactNativePluginConfig;
+    private _analyticsPlugin: IAppInsights;
 
     constructor(config?: IReactNativePluginConfig) {
         this._config = config || this._getDefaultConfig();
@@ -47,6 +50,14 @@ export class ReactNativePlugin implements ITelemetryPlugin {
             }
             if (!this._config.disableDeviceCollection) {
                 this._collectDeviceInfo();
+            }
+            if (extensions) {
+                CoreUtils.arrForEach(extensions, ext => {
+                    const identifier = (ext as ITelemetryPlugin).identifier;
+                    if (identifier === 'ApplicationInsightsAnalytics') {
+                        this._analyticsPlugin = (ext as any) as IAppInsights;
+                    }
+                });
             }
         }
         this._initialized = true;
@@ -73,6 +84,16 @@ export class ReactNativePlugin implements ITelemetryPlugin {
 
     public setDeviceType(newType: string) {
         this._device.deviceClass = newType;
+    }
+
+    trackMetric(metric: IMetricTelemetry, customProperties: ICustomProperties) {
+        if (this._analyticsPlugin) {
+            this._analyticsPlugin.trackMetric(metric, customProperties);
+        } else {
+            console.log("how to use diagnosticlogger here?");
+            // this.diagLog().throwInternal(
+            //     LoggingSeverity.CRITICAL, _InternalMessageId.TelemetryInitializerFailed, "Analytics plugin is not available, React plugin telemetry will not be sent: ");
+        }
     }
 
     /**
