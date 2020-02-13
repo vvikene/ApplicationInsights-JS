@@ -14,6 +14,7 @@ import {
 } from '@microsoft/applicationinsights-core-js';
 import { ConfigurationManager, IDevice, IMetricTelemetry, IAppInsights } from '@microsoft/applicationinsights-common';
 import DeviceInfo from 'react-native-device-info';
+import { setJSExceptionHandler, setNativeExceptionHandler } from 'react-native-exception-handler';
 
 import { INativeDevice, IReactNativePluginConfig } from './Interfaces';
 
@@ -50,6 +51,14 @@ export class ReactNativePlugin implements ITelemetryPlugin {
             }
             if (!this._config.disableDeviceCollection) {
                 this._collectDeviceInfo();
+            }
+            if (!this._config.disableExceptionCollection) {
+                setJSExceptionHandler((error, isFatal) => {
+                    console.log("an unhandled error - JSExceptionHandler: " + error);
+                }, true);
+                setNativeExceptionHandler(exceptionString => {
+                    console.log("a native exception - NativeExceptionHandler: " + exceptionString);
+                }, true);
             }
             if (extensions) {
                 CoreUtils.arrForEach(extensions, ext => {
