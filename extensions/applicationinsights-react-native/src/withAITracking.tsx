@@ -72,7 +72,7 @@ export default function withAITracking<P>(reactNativePlugin: ReactNativePlugin, 
 
     public render() {
       return (
-        <View>
+        <View style={{height: '100%', width: '100%'}}>
           <Component {...this.props}/>
         </View>
       );

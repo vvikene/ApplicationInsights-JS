@@ -36,8 +36,9 @@
         "qunit": "^2.9.3"
     },
     "dependencies": {
-        "@microsoft/applicationinsights-core-js": "^2.3.0",
-        "@microsoft/applicationinsights-common": "^2.3.0",
+        "@microsoft/applicationinsights-common": "^2.4.4",
+        "@microsoft/applicationinsights-core-js": "^2.4.4",
+        "@types/react": "^16.9.19",
         "tslib": "^1.9.3"
     },
     "peerDependencies": {
