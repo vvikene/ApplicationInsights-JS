@@ -52,15 +52,7 @@ export class ReactNativePlugin implements ITelemetryPlugin {
             if (!this._config.disableDeviceCollection) {
                 this._collectDeviceInfo();
             }
-            if (!this._config.disableExceptionCollection) {
-                this._autoCollectException();
-                // setJSExceptionHandler((error, isFatal) => {
-                //     console.log("an unhandled error - JSExceptionHandler: " + error);
-                // }, true);
-                // setNativeExceptionHandler(exceptionString => {
-                //     console.log("a native exception - NativeExceptionHandler: " + exceptionString);
-                // }, true);
-            }
+            
             if (extensions) {
                 CoreUtils.arrForEach(extensions, ext => {
                     const identifier = (ext as ITelemetryPlugin).identifier;
@@ -68,6 +60,15 @@ export class ReactNativePlugin implements ITelemetryPlugin {
                         this._analyticsPlugin = (ext as any) as IAppInsights;
                     }
                 });
+            }
+
+            if (!this._config.disableExceptionCollection) {
+                setJSExceptionHandler((error, isFatal) => {
+                    this._trackException({exception: error});
+                }, true);
+                setNativeExceptionHandler(exceptionString => {
+                    this._trackException({exception: new Error(exceptionString)});
+                }, true);
             }
         }
         this._initialized = true;
@@ -106,13 +107,13 @@ export class ReactNativePlugin implements ITelemetryPlugin {
         }
     }
 
-    // private trackException(exception: IExceptionTelemetry) {
-    //     if (this._analyticsPlugin) {
-    //         this._analyticsPlugin.trackException(exception);
-    //     } else {
-    //         console.log("diagnosticLogger???");
-    //     }
-    // }
+    private _trackException(exception: IExceptionTelemetry) {
+        if (this._analyticsPlugin) {
+            this._analyticsPlugin.trackException(exception);
+        } else {
+            console.log("diagnosticLogger here???");
+        }
+    }
 
     /**
      * Automatically collects native device info for this device
@@ -136,27 +137,6 @@ export class ReactNativePlugin implements ITelemetryPlugin {
             if (typeof this._device.deviceClass === 'string') {
                 item.ext.device.deviceClass = this._device.deviceClass;
             }
-        }
-    }
-
-    /**
-     * Automatically collects native device info for this device
-     */
-    private _autoCollectException() {
-        // //intercept react-native error handling
-        if (global && global.ErrorUtils && global.ErrorUtils._globalHandler) {
-          let defaultHandler = ErrorUtils.getGlobalHandler && ErrorUtils.getGlobalHandler() || ErrorUtils._globalHandler;
-          global.ErrorUtils.setGlobalHandler((error, isFatal) => {
-
-            //do anything with the error here
-            if (this._analyticsPlugin) {
-                this._analyticsPlugin.trackException(error);
-            } else {
-                console.log("diagnosticLogger???");
-            }
-        
-            defaultHandler(error, isFatal);  //after you're finished, call the defaultHandler so that react-native also gets the error
-          });
         }
     }
 
