@@ -12,7 +12,7 @@ import {
     ICustomProperties,
     CoreUtils
 } from '@microsoft/applicationinsights-core-js';
-import { ConfigurationManager, IDevice, IMetricTelemetry, IAppInsights } from '@microsoft/applicationinsights-common';
+import { ConfigurationManager, IDevice, IMetricTelemetry, IAppInsights, IExceptionTelemetry } from '@microsoft/applicationinsights-common';
 import DeviceInfo from 'react-native-device-info';
 import { setJSExceptionHandler, setNativeExceptionHandler } from 'react-native-exception-handler';
 
@@ -53,12 +53,13 @@ export class ReactNativePlugin implements ITelemetryPlugin {
                 this._collectDeviceInfo();
             }
             if (!this._config.disableExceptionCollection) {
-                setJSExceptionHandler((error, isFatal) => {
-                    console.log("an unhandled error - JSExceptionHandler: " + error);
-                }, true);
-                setNativeExceptionHandler(exceptionString => {
-                    console.log("a native exception - NativeExceptionHandler: " + exceptionString);
-                }, true);
+                this._autoCollectException();
+                // setJSExceptionHandler((error, isFatal) => {
+                //     console.log("an unhandled error - JSExceptionHandler: " + error);
+                // }, true);
+                // setNativeExceptionHandler(exceptionString => {
+                //     console.log("a native exception - NativeExceptionHandler: " + exceptionString);
+                // }, true);
             }
             if (extensions) {
                 CoreUtils.arrForEach(extensions, ext => {
@@ -105,6 +106,14 @@ export class ReactNativePlugin implements ITelemetryPlugin {
         }
     }
 
+    // private trackException(exception: IExceptionTelemetry) {
+    //     if (this._analyticsPlugin) {
+    //         this._analyticsPlugin.trackException(exception);
+    //     } else {
+    //         console.log("diagnosticLogger???");
+    //     }
+    // }
+
     /**
      * Automatically collects native device info for this device
      */
@@ -130,10 +139,32 @@ export class ReactNativePlugin implements ITelemetryPlugin {
         }
     }
 
+    /**
+     * Automatically collects native device info for this device
+     */
+    private _autoCollectException() {
+        // //intercept react-native error handling
+        if (global && global.ErrorUtils && global.ErrorUtils._globalHandler) {
+          let defaultHandler = ErrorUtils.getGlobalHandler && ErrorUtils.getGlobalHandler() || ErrorUtils._globalHandler;
+          global.ErrorUtils.setGlobalHandler((error, isFatal) => {
+
+            //do anything with the error here
+            if (this._analyticsPlugin) {
+                this._analyticsPlugin.trackException(error);
+            } else {
+                console.log("diagnosticLogger???");
+            }
+        
+            defaultHandler(error, isFatal);  //after you're finished, call the defaultHandler so that react-native also gets the error
+          });
+        }
+    }
+
     private _getDefaultConfig(): IReactNativePluginConfig {
         return {
             // enable autocollection by default
-            disableDeviceCollection: false
+            disableDeviceCollection: false,
+            disableExceptionCollection: false
         };
     }
 }
