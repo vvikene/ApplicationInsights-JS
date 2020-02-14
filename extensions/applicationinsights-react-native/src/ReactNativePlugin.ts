@@ -7,10 +7,13 @@ import {
     ITelemetryPlugin,
     ITelemetryItem,
     IPlugin,
-    IConfiguration,
     IAppInsightsCore, 
     ICustomProperties,
-    CoreUtils
+    CoreUtils,
+    IDiagnosticLogger,
+    DiagnosticLogger,
+    LoggingSeverity,
+    _InternalMessageId
 } from '@microsoft/applicationinsights-core-js';
 import { ConfigurationManager, IDevice, IMetricTelemetry, IAppInsights, IExceptionTelemetry } from '@microsoft/applicationinsights-common';
 import DeviceInfo from 'react-native-device-info';
@@ -27,10 +30,12 @@ export class ReactNativePlugin implements ITelemetryPlugin {
     private _device: INativeDevice;
     private _config: IReactNativePluginConfig;
     private _analyticsPlugin: IAppInsights;
+    private _logger: IDiagnosticLogger;
 
     constructor(config?: IReactNativePluginConfig) {
         this._config = config || this._getDefaultConfig();
         this._device = {};
+        this._logger = new DiagnosticLogger();
     }
 
     public initialize(
@@ -101,9 +106,8 @@ export class ReactNativePlugin implements ITelemetryPlugin {
         if (this._analyticsPlugin) {
             this._analyticsPlugin.trackMetric(metric, customProperties);
         } else {
-            console.log("how to use diagnosticlogger here?");
-            // this.diagLog().throwInternal(
-            //     LoggingSeverity.CRITICAL, _InternalMessageId.TelemetryInitializerFailed, "Analytics plugin is not available, React plugin telemetry will not be sent: ");
+            this._logger.throwInternal(
+                LoggingSeverity.CRITICAL, _InternalMessageId.TelemetryInitializerFailed, "Analytics plugin is not available, ReactNative plugin telemetry will not be sent: ");
         }
     }
 
@@ -111,7 +115,8 @@ export class ReactNativePlugin implements ITelemetryPlugin {
         if (this._analyticsPlugin) {
             this._analyticsPlugin.trackException(exception);
         } else {
-            console.log("diagnosticLogger here???");
+            this._logger.throwInternal(
+                LoggingSeverity.CRITICAL, _InternalMessageId.TelemetryInitializerFailed, "Analytics plugin is not available, ReactNative plugin telemetry will not be sent: ");
         }
     }
 
