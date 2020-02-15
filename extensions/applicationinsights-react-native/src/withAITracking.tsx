@@ -3,8 +3,9 @@
 
 import { IMetricTelemetry } from '@microsoft/applicationinsights-common';
 import * as React from 'react';
-import { View, Keyboard, keyboardEventListener } from 'react-native';
+import { Keyboard, keyboardEventListener, TouchableWithoutFeedback } from 'react-native';
 import { ReactNativePlugin } from './ReactNativePlugin';
+import { EventRegister } from 'react-native-event-listeners';
 
 /**
  * Higher-order component function to hook Application Insights tracking 
@@ -34,6 +35,7 @@ export default function withAITracking<P>(reactNativePlugin: ReactNativePlugin, 
     private _idleTimeout: number = 5000;
     private keyboardDidShowListener: keyboardEventListener;
     private keyboardDidHideListener: keyboardEventListener;
+    private listener;
 
     public componentDidMount() {
       this._firstActiveTimestamp = 0;
@@ -48,6 +50,10 @@ export default function withAITracking<P>(reactNativePlugin: ReactNativePlugin, 
       this.keyboardDidHideListener = Keyboard.addListener(
         'keyboardDidHide',
         this.trackActivity,
+      );
+      this.listener = EventRegister.addEventListener(
+        'onPress',
+        () => console.log("onPress is called")
       );
     }
 
@@ -68,11 +74,12 @@ export default function withAITracking<P>(reactNativePlugin: ReactNativePlugin, 
 
       this.keyboardDidShowListener.remove();
       this.keyboardDidHideListener.remove();
+      EventRegister.removeEventListener(this.listener);
     }
 
     public render() {
       return (
-        <Component {...this.props}/>
+          <Component {...this.props}/>
       );
     }
 

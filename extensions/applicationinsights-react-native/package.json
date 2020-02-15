@@ -40,6 +40,7 @@
         "@microsoft/applicationinsights-common": "^2.4.4",
         "@microsoft/applicationinsights-core-js": "^2.4.4",
         "@types/react": "^16.9.19",
+        "react-native-event-listeners": "^1.0.7",
         "tslib": "^1.9.3"
     },
     "peerDependencies": {

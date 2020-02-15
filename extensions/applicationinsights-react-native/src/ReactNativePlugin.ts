@@ -18,6 +18,8 @@ import {
 import { ConfigurationManager, IDevice, IMetricTelemetry, IAppInsights, IExceptionTelemetry } from '@microsoft/applicationinsights-common';
 import DeviceInfo from 'react-native-device-info';
 import { setJSExceptionHandler, setNativeExceptionHandler } from 'react-native-exception-handler';
+import { EventRegister } from 'react-native-event-listeners';
+import { NativeModules } from 'react-native'
 
 import { INativeDevice, IReactNativePluginConfig } from './Interfaces';
 
@@ -31,6 +33,7 @@ export class ReactNativePlugin implements ITelemetryPlugin {
     private _config: IReactNativePluginConfig;
     private _analyticsPlugin: IAppInsights;
     private _logger: IDiagnosticLogger;
+    private _listener;
 
     constructor(config?: IReactNativePluginConfig) {
         this._config = config || this._getDefaultConfig();
@@ -44,6 +47,7 @@ export class ReactNativePlugin implements ITelemetryPlugin {
         extensions?: IPlugin[]
     ) {
         if (!this._initialized) {
+            console.log(global);
             const inConfig = config || {};
             const defaultConfig = this._getDefaultConfig();
             for (const option in defaultConfig) {
@@ -68,13 +72,19 @@ export class ReactNativePlugin implements ITelemetryPlugin {
             }
 
             if (!this._config.disableExceptionCollection) {
-                setJSExceptionHandler((error, isFatal) => {
-                    this._trackException({exception: error});
-                }, true);
-                setNativeExceptionHandler(exceptionString => {
-                    this._trackException({exception: new Error(exceptionString)});
-                }, true);
+                // setJSExceptionHandler((error, isFatal) => {
+                //     this._trackException({exception: error});
+                // }, true);
+                // setNativeExceptionHandler(exceptionString => {
+                //     this._trackException({exception: new Error(exceptionString)});
+                // }, true);
             }
+
+            // if (!this._config.disableClicksCollection) {
+            //     this._listener = EventRegister.addEventListener('onPress', () => {
+            //         console.log("onPress is called");
+            //     });
+            // }
         }
         this._initialized = true;
     }
@@ -149,7 +159,8 @@ export class ReactNativePlugin implements ITelemetryPlugin {
         return {
             // enable autocollection by default
             disableDeviceCollection: false,
-            disableExceptionCollection: false
+            disableExceptionCollection: false,
+            disableClicksCollection: false
         };
     }
 }
