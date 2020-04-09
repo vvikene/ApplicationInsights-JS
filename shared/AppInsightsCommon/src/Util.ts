@@ -340,7 +340,15 @@ export class Util {
         return CoreUtils._canUseCookies;
     }
 
-    public static disallowsSameSiteNone(userAgent: string) {
+    public static isSafari(userAgent?:string) {
+        if (!CoreUtils.isString(userAgent)) {
+            userAgent = (getNavigator()||{} as Navigator).userAgent;
+        }
+        var ua = (userAgent||"").toLowerCase();
+        return (ua.indexOf('safari') >= 0);
+    }
+
+    public static disallowsSameSiteNone(userAgent:string) {
         if (!_isString(userAgent)) {
             return false;
         }
@@ -530,14 +538,14 @@ export class Util {
     /**
      * Check if an object is of type Array
      */
-    public static isArray(obj: any): boolean {
+    public static isArray(obj: any): obj is Array<any> {
         return Object[strPrototype].toString.call(obj) === "[object Array]";
     }
 
     /**
      * Check if an object is of type Error
      */
-    public static isError(obj: any): boolean {
+    public static isError(obj: any): obj is Error {
         return Object[strPrototype].toString.call(obj) === "[object Error]";
     }
 
@@ -594,8 +602,8 @@ export class Util {
      * Checks if error has no meaningful data inside. Ususally such errors are received by window.onerror when error
      * happens in a script from other domain (cross origin, CORS).
      */
-    public static isCrossOriginError(message: string, url: string, lineNumber: number, columnNumber: number, error: Error): boolean {
-        return (message === "Script error." || message === "Script error") && !error;
+    public static isCrossOriginError(message: string, url: string, lineNumber: number, columnNumber: number, error: Error | Event): boolean {
+        return !error && _isString(message) && (message === "Script error." || message === "Script error");
     }
 
     /**

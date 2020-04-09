@@ -16,11 +16,11 @@ function _isTypeof(value: any, theType: string): boolean {
     return typeof value === theType;
 };
 
-function _isUndefined(value: any): boolean {
+function _isUndefined(value: any): value is undefined {
     return _isTypeof(value, strShimUndefined) || value === undefined;
 };
 
-function _isNullOrUndefined(value: any): boolean {
+function _isNullOrUndefined(value: any): value is null|undefined {
     return (_isUndefined(value) || value === null);
 }
 
@@ -28,11 +28,11 @@ function _hasOwnProperty(obj: any, prop: string): boolean {
     return obj && Object[strShimPrototype].hasOwnProperty.call(obj, prop);
 };
 
-function _isObject(value: any): boolean {
+function _isObject(value: any): value is object {
     return _isTypeof(value, strShimObject);
 };
 
-function _isFunction(value: any): boolean {
+function _isFunction(value: any): value is Function {
     return _isTypeof(value, strShimFunction);
 };
 
@@ -131,7 +131,7 @@ export class CoreUtils {
     /**
      * Check if an object is of type Date
      */
-    public static isDate(obj: any): boolean {
+    public static isDate(obj: any): obj is Date {
         return Object[strShimPrototype].toString.call(obj) === "[object Date]";
     }
 
@@ -140,7 +140,7 @@ export class CoreUtils {
      * @param {any} value - Value to be checked.
      * @return {boolean} True if the value is a string, false otherwise.
      */
-    public static isString(value: any): boolean {
+    public static isString(value: any): value is string {
         return _isTypeof(value, "string");
     }
 
@@ -149,7 +149,7 @@ export class CoreUtils {
      * @param {any} value - Value to be checked.
      * @return {boolean} True if the value is a number, false otherwise.
      */
-    public static isNumber(value: any): boolean {
+    public static isNumber(value: any): value is number {
         return _isTypeof(value, "number");
     }
 
@@ -158,7 +158,7 @@ export class CoreUtils {
      * @param {any} value - Value to be checked.
      * @return {boolean} True if the value is a boolean, false otherwise.
      */
-    public static isBoolean(value: any): boolean {
+    public static isBoolean(value: any): value is boolean {
         return _isTypeof(value, "boolean");
     }
 
@@ -219,11 +219,13 @@ export class CoreUtils {
      * @param callbackfn  A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
      * @param thisArg  [Optional] An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
      */
-    public static arrForEach<T>(arr: T[], callbackfn: (value: T, index?: number, array?: T[]) => void, thisArg?: any): void {
-        let len = arr.length;
-        for (let idx = 0; idx < len; idx++) {
-            if (idx in arr) {
-                callbackfn.call(thisArg || arr, arr[idx], idx, arr);
+    public static arrForEach<T>(arr: T[], callbackfn: (value: T, index?: number, array?: T[]) => void, thisArg?: any):void {
+        if (arr) {
+            let len = arr.length;
+            for (let idx = 0; idx < len; idx++) {
+                if (idx in arr) {
+                    callbackfn.call(thisArg || arr, arr[idx], idx, arr);
+                }
             }
         }
     }
@@ -465,4 +467,20 @@ export class EventHelper {
      * @return {boolean} - true if the handler was successfully added
      */
     public static DetachEvent: (obj: any, eventNameWithoutOn: string, handlerRef: any) => void = _detachEvent;
+}
+
+
+/**
+* Create a new guid.
+* @returns The guid.
+*/
+export function createGuid(): string {
+    var guidPattern = 'xxxxxxxx-xxxx-4xxx-Rxxx-xxxxxxxxxxxx';
+    function randomHexDigit() {
+        return Math.floor(Math.random() * 16).toString(16);
+    }
+    var result = guidPattern.replace(/x/g, randomHexDigit);
+
+    // update remaining 2 bits of first digit of the clock_seq_hi_and_reserved:
+    return result.replace('R', (8 | Math.floor(Math.random() * 3)).toString(16));
 }
