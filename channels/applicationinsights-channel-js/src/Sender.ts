@@ -219,7 +219,7 @@ export class Sender extends BaseTelemetryPlugin implements IChannelControlsAI {
             this._senderConfig[field] = () => ctx.getConfig(identifier, field, defaultConfig[field]());
         }
 
-        this._buffer = (this._senderConfig.enableSessionStorageBuffer && Util.canUseSessionStorage())
+        this._buffer = (this._senderConfig.enableSessionStorageBuffer() && Util.canUseSessionStorage())
             ? new SessionStorageSendBuffer(this.diagLog(), this._senderConfig) : new ArraySendBuffer(this._senderConfig);
         this._sample = new Sample(this._senderConfig.samplingPercentage(), this.diagLog());
 

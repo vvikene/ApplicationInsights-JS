@@ -94,7 +94,7 @@ class TestClass {
     
                     testComplete = true;
                     // done is QUnit callback indicating the end of the test
-                    self._testCompleted();
+                    self._testCompleted(false);
                     done();
                 }
     
@@ -313,7 +313,15 @@ class TestClass {
     }
 
     /** Called when the test is completed. */
-    private _testCompleted(failed?: boolean) {
+    private _testCompleted(failed: boolean) {
+        if (this.useFakeTimers) {
+            this.clock.restore();
+        }
+
+        if (this.useFakeServer && this.server) {
+            this.server.restore();
+        }
+
         this._cleanupAllHooks();
 
         if (failed) {
