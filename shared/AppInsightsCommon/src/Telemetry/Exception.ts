@@ -23,7 +23,7 @@ const strStack = "stack";
 const strStackDetails = "stackDetails";
 
 function _isExceptionDetailsInternal(value:any): value is IExceptionDetailsInternal {
-    return "hasFullStack" in value && "typeName" in value && "parsedStack" in value;
+    return "hasFullStack" in value && "typeName" in value;
 }
 
 function _isExceptionInternal(value:any): value is IExceptionInternal {
