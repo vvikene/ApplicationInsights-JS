@@ -5,10 +5,12 @@ import dynamicRemove from "@microsoft/dynamicproto-js/tools/rollup/node/removedy
 import { es3Poly, es3Check, importCheck } from "@microsoft/applicationinsights-rollup-es3";
 import { updateDistEsmFiles } from "../tools/updateDistEsm/updateDistEsm";
 
-const version = require("./package.json").version;
+const packageJson = require("./package.json");
+const version = packageJson.version;
+const pkgDesc = packageJson.description;
 const banner = [
   "/*!",
-  ` * Application Insights JavaScript Web SDK - Basic, ${version}`,
+  ` * ${pkgDesc}, ${version}`,
   " * Copyright (c) Microsoft and contributors. All rights reserved.",
   " */"
 ].join("\n");

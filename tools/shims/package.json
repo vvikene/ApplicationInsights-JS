@@ -3,6 +3,7 @@
     "author": "Microsoft Corporation",
     "version": "1.0.1",
     "description": "Microsoft Application Insights JavaScript SDK - Shim functions",
+    "homepage": "https://github.com/microsoft/ApplicationInsights-JS/tree/master/tools/shims",
     "keywords": [
         "azure",
         "cloud",
@@ -16,11 +17,12 @@
     "types": "types/applicationinsights-shims.d.ts",
     "scripts": {
         "clean": "grunt clean",
-        "build": "npm run build:esm && npm run build:bundle",
+        "build": "npm run build:esm && npm run build:bundle && npm run dtsgen",
         "build:esm": "grunt shims",
         "build:bundle": "rollup -c rollup.config.js",
         "test": "grunt shimstest",
-        "lint": "tslint -p tsconfig.json"
+        "lint": "tslint -p tsconfig.json",
+        "dtsgen": "api-extractor run --local && powershell -ExecutionPolicy Bypass ../../scripts/dtsgen.ps1 'Microsoft.ApplicationInsights.Shims'"
     },
     "repository": {
         "type": "git",
@@ -30,6 +32,7 @@
     "sideEffects": false,
     "devDependencies": {
         "@microsoft/applicationinsights-rollup-es3" : "1.1.2",
+        "@microsoft/api-extractor" : "^7.6.1",
         "grunt": "1.0.1",
         "grunt-contrib-clean": "^1.1.0",
         "grunt-contrib-uglify": "3.1.0",

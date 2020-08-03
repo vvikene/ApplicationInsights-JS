@@ -2,19 +2,22 @@
     "name": "@microsoft/applicationinsights-web-basic",
     "version": "2.5.7",
     "description": "Microsoft Application Insights Javascript SDK core and channel",
+    "homepage": "https://github.com/Microsoft/ApplicationInsights-JS",
     "main": "dist/applicationinsights-web-basic.js",
     "module": "dist-esm/index.js",
     "types": "types/index.d.ts",
     "sideEffects": false,
     "scripts": {
-        "build": "npm run build:esm && npm run build:browser",
+        "build": "npm run build:esm && npm run build:browser && npm run dtsgen",
         "build:esm": "grunt aiskulite",
         "build:browser": "rollup -c",
         "test": "echo 'No tests'",
-        "lint": "tslint -p tsconfig.json"
+        "lint": "tslint -p tsconfig.json",
+        "dtsgen": "api-extractor run --local && powershell -ExecutionPolicy Bypass ../scripts/dtsgen.ps1 'Microsoft.ApplicationInsights'"
     },
     "devDependencies": {
         "@microsoft/applicationinsights-rollup-es3" : "1.1.2",
+        "@microsoft/api-extractor" : "^7.6.1",
         "grunt": "1.0.1",
         "globby": "^11.0.0",
         "rollup-plugin-node-resolve": "^3.4.0",
