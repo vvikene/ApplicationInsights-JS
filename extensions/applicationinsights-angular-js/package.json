@@ -18,9 +18,11 @@
         "lint": "tslint -p tsconfig.json"
     },
     "devDependencies": {
-        "@microsoft/applicationinsights-rollup-es3" : "1.1.2",
+        "@microsoft/applicationinsights-rollup-es3": "1.1.2",
         "@angular/core": "~8.1.2",
         "@angular/router": "~8.1.2",
+        "@types/angular": "^1.7.2",
+        "angular": "^1.8.0",
         "grunt": "1.0.1",
         "rollup": "^0.66.0",
         "rollup-plugin-commonjs": "^9.3.4",
@@ -38,9 +40,9 @@
         "tslint-config-prettier": "^1.18.0"
     },
     "dependencies": {
-        "@microsoft/applicationinsights-shims" : "1.0.1",
         "@microsoft/applicationinsights-common": "2.5.7",
-        "@microsoft/applicationinsights-core-js": "2.5.7"
+        "@microsoft/applicationinsights-core-js": "2.5.7",
+        "@microsoft/applicationinsights-shims": "1.0.1"
     },
     "license": "MIT"
 }

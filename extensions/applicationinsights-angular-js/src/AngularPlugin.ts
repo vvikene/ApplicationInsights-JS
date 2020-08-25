@@ -4,7 +4,7 @@
  */
 
 import {
-    IConfig, IPageViewTelemetry, IMetricTelemetry, IAppInsights
+    IConfig, IPageViewTelemetry, IMetricTelemetry, IAppInsights, IEventTelemetry, IExceptionTelemetry
 } from "@microsoft/applicationinsights-common";
 import {
     IPlugin, IConfiguration, IAppInsightsCore,
@@ -12,6 +12,8 @@ import {
     IProcessTelemetryContext, _InternalMessageId, LoggingSeverity, ICustomProperties
 } from "@microsoft/applicationinsights-core-js";
 import { IAngularExtensionConfig } from './Interfaces/IAngularExtensionConfig';
+
+const NAVIGATIONEND = "NavigationEnd";
 
 export default class AngularPlugin extends BaseTelemetryPlugin {
     public priority = 186;
@@ -30,19 +32,24 @@ export default class AngularPlugin extends BaseTelemetryPlugin {
             }
         });
         if (extConfig.router) {
+            let isPageInitialLoad = true;
+            if (isPageInitialLoad) {
+                const pageViewTelemetry: IPageViewTelemetry = {
+                    uri: extConfig.router.url
+                };
+                this.trackPageView(pageViewTelemetry);
+            }
             extConfig.router.events.subscribe(event => {
-                if (event.constructor.name === "NavigationEnd") {
-                    // Timeout to ensure any changes to the DOM made by route changes get included in pageView telemetry
-                    setTimeout(() => {
-                        const pageViewTelemetry: IPageViewTelemetry = { uri: extConfig.router.url };
-                        this.trackPageView(pageViewTelemetry);
-                    }, 500);
+                if (event.constructor.name === NAVIGATIONEND) {
+                    // for page initial load, do not call trackPageView twice
+                    if (isPageInitialLoad) {
+                        isPageInitialLoad = false;
+                        return;
+                    }
+                    const pageViewTelemetry: IPageViewTelemetry = { uri: extConfig.router.url };
+                    this.trackPageView(pageViewTelemetry);
                 }
             });
-            const pageViewTelemetry: IPageViewTelemetry = {
-                uri: extConfig.router.url
-            };
-            this.trackPageView(pageViewTelemetry);
         }
     }
 
@@ -71,4 +78,24 @@ export default class AngularPlugin extends BaseTelemetryPlugin {
                 LoggingSeverity.CRITICAL, _InternalMessageId.TelemetryInitializerFailed, "Analytics plugin is not available, Angular plugin telemetry will not be sent: ");
         }
     }
+
+    trackEvent(event: IEventTelemetry, customProperties?: ICustomProperties) {
+        if (this._analyticsPlugin) {
+            this._analyticsPlugin.trackEvent(event, customProperties);
+        } else {
+            this.diagLog().throwInternal(
+                LoggingSeverity.CRITICAL, _InternalMessageId.TelemetryInitializerFailed, "Analytics plugin is not available, React plugin telemetry will not be sent: ");
+        }
+    }
+
+    // trackException(exception: IExceptionTelemetry, customProperties?: {
+    //     [key: string]: any;
+    // }) {
+    //     if (this._analyticsPlugin) {
+    //         this._analyticsPlugin.trackException(exception, customProperties);
+    //     } else {
+    //         this.diagLog().throwInternal(
+    //             LoggingSeverity.CRITICAL, _InternalMessageId.TelemetryInitializerFailed, "Analytics plugin is not available, React plugin telemetry will not be sent: ");
+    //     }
+    // };
 }
